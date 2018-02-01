@@ -1,0 +1,1 @@
+This directory is for managing 'ysi' package on PyPi

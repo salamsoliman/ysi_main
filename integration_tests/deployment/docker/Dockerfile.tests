@@ -1,0 +1,47 @@
+FROM ubuntu:xenial
+
+# Install dependancies from apt
+RUN apt-get -y update
+RUN apt-get install -y python-pip python-dev libssl-dev libffi-dev rng-tools libgmp3-dev lsof
+
+# Install Bitcoin
+RUN apt-get -y update
+RUN apt-get install -y python-software-properties
+RUN apt-get install -y software-properties-common
+
+RUN add-apt-repository ppa:bitcoin/bitcoin
+RUN apt-get -y update
+RUN apt-get install -y bitcoind sqlite3 curl
+
+# Add standard username and password
+RUN mkdir ~/.bitcoin
+RUN echo "rpcuser=ysi\nrpcpassword=ysisystem\n" > ~/.bitcoin/bitcoin.conf
+
+# Install NodeJS
+RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
+RUN apt-get install -y nodejs
+
+# Install requirements for the ysi.js integration tests
+RUN apt-get install -y git babel
+RUN npm i -g browserify
+RUN git clone https://git@github.com/ysi/ysi.js.git /tmp/ysi.js
+RUN git clone https://github.com/ysi/ysi-storage-js.git /tmp/ysi-storage-js
+RUN cd /tmp/ysi.js && npm ln
+RUN cd /tmp/ysi-storage-js && npm ln
+
+# Install pyparsing
+RUN pip install --upgrade pip && pip install pyparsing
+
+# Build ysi first
+WORKDIR /src/ysi
+
+# Copy all files from the repo into the container
+COPY . .
+
+# Install Blockstack from source
+RUN pip install .
+
+# Change into the tests directory
+WORKDIR /src/ysi/integration_tests
+
+RUN pip install .

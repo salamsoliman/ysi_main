@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo "This command is DEPRECATED.  Please use \`ysi-core\` in the future."
+
+shift 1
+exec ysi-core $@
